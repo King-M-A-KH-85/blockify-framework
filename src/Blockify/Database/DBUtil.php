@@ -1,4 +1,5 @@
 <?php
+
 namespace Blockify\Database;
 
 use JetBrains\PhpStorm\Pure;
@@ -31,10 +32,10 @@ class DBUtil
         return $this;
     }
 
-    public function __construct()
+    public function __construct(string $host, string $dbName, string $username, string $password)
     {
         //create an instance of database classes
-        $this->database = new Database();
+        $this->database = new Database($host, $dbName, $username, $password);
     }
 
     #[Pure] private function parseData(array $data): string
@@ -234,7 +235,7 @@ class DBUtil
         return $query->exec();
     }
 
-    public function query(String $query): bool
+    public function query(string $query): bool
     {
         $query = $this->database->query($query);
         return $query->exec();

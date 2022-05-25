@@ -1,4 +1,5 @@
 <?php
+
 namespace Blockify\Database;
 
 use PDO;
@@ -8,10 +9,10 @@ class Database
 {
     private PDO $pdo;
 
-    public function __construct()
+    public function __construct(string $host, string $dbName, string $username, string $password)
     {
         try {
-            $this->pdo = new PDO("mysql:host=localhost;dbname=ThLearn", "root", "", [
+            $this->pdo = new PDO("mysql:host=$host;dbname=$dbName", $username, $password, [
                 PDO::ATTR_PERSISTENT => true,
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
@@ -20,7 +21,7 @@ class Database
         }
     }
 
-    public function query(String $query): DBStatement
+    public function query(string $query): DBStatement
     {
         return new DBStatement($this->pdo->prepare($query));
     }

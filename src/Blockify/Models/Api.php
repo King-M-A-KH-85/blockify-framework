@@ -1,12 +1,6 @@
 <?php
 namespace Blockify\Models;
 
-/**
- * @author king m a kh
- * @note api model
- * @link https://blockifyApi.ir/doc/blockify/models/api
- * @version 1.0
- */
 class Api
 {
     private bool $status;
