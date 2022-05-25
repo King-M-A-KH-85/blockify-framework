@@ -37,33 +37,33 @@ final class Blockify
     /**
      * @throws ReflectionException
      */
-    public function start(string $viewPath, string $appPath, string $namespace): void
+    public function start(string $viewPath, string $appPath, string $namespace): string
     {
         if ($this->isPage) {
             if (!(file_exists("$viewPath$this->requestController.html") || file_exists("$viewPath$this->requestController.php")))
-                echo $this->errorController::viewError($this->requestController);
+                return $this->errorController::viewError($this->requestController);
 
-            echo self::page_request($viewPath);
+            return self::page_request($viewPath);
 
         } else {
             if (!file_exists("$appPath$this->requestController.php")) {
-                echo $this->errorController::classError($this->requestController)->toString();
+                return $this->errorController::classError($this->requestController)->toString();
             } else {
                 require_once "$appPath$this->requestController.php";
 
                 $instance = new ReflectionClass("$namespace$this->requestController");
 
                 if (!$instance->hasMethod($this->requestFunction))
-                    echo $this->errorController::functionError($this->requestFunction)->toString();
+                    return $this->errorController::functionError($this->requestFunction)->toString();
                 else {
                     $method = $instance->getMethod($this->requestFunction);
 
                     if (!$method->hasReturnType() || $method->getReturnType()->getName() != "Blockify\Models\Api") {
-                        echo "no standard type";
+                        return "no standard type";
 
                     } else {
                         if (count($method->getParameters()) < count($this->jsonArguments))
-                            echo $this->errorController::parameterCountError(count($method->getParameters()))->toString();
+                            return $this->errorController::parameterCountError(count($method->getParameters()))->toString();
                         else {
                             $notExistKeys = [];
                             $parameters = [];
@@ -96,13 +96,13 @@ final class Blockify
                                         "doc" => $docs[$index] ?? ""
                                     ];
                                 }
-                                echo $this->errorController::parameterError($args)->toString();
+                                return $this->errorController::parameterError($args)->toString();
                             }
                         }
                     }
                 }
             }
-            echo self::api_request($namespace);
+            return self::api_request($namespace);
         }
     }
 
