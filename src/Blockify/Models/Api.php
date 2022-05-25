@@ -7,7 +7,7 @@ class Api
     private string $message;
     private array $result;
 
-    public function __construct(bool $status = false, string $message = "", array|null $result = [])
+    public function __construct(bool $status = false, string $message = "", array $result = [])
     {
         $this->status = $status;
         $this->message = $message;
