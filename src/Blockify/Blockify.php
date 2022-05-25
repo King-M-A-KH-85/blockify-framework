@@ -17,13 +17,17 @@ final class Blockify
     private string $requestFunction;
     private array $jsonArguments;
 
-    public function __construct(public string $_url, public string $defaultController, public errorApplication $errorController)
+    public string $defaultController;
+    public errorApplication $errorController;
+
+    public function __construct(string $_url, string $_defaultController, errorApplication $_errorController)
     {
         $url = explode('/', filter_var($_url, FILTER_SANITIZE_URL));
 
+        $this->errorController = $_errorController;
         $this->isPage = $_SERVER['REQUEST_METHOD'] == 'GET';
 
-        $this->requestController = (($url[0] ?? '') == "") ? $defaultController : $url[0];
+        $this->requestController = (($url[0] ?? '') == "") ? $_defaultController : $url[0];
 
         if (!$this->isPage) {
             $this->requestFunction = (($url[1] ?? '') == "") ? "onRequest" : $url[1];
