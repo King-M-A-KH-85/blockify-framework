@@ -17,7 +17,6 @@ final class Blockify
     private string $requestFunction;
     private array $jsonArguments;
 
-    public string $defaultController;
     public errorApplication $errorController;
 
     public function __construct(string $_url, string $_defaultController, errorApplication $_errorController)
