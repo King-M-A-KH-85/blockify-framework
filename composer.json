@@ -1,0 +1,38 @@
+{
+    "name": "blockify/framework",
+    "description": "The Blockify Framework.",
+    "keywords": [
+        "framework",
+        "blockify"
+    ],
+    "license": "MIT",
+    "homepage": "https://blockifyApi.ir",
+    "authors": [
+        {
+            "name": "king m a kh",
+            "email": "info@blockifyApi.ir"
+        }
+    ],
+    "require": {
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Blockify\\": "src/Blockify"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "9.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

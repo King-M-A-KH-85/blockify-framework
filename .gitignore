@@ -1,0 +1,11 @@
+composer.lock
+/node_modules
+/public/hot
+/storage/*.key
+/storage/backup
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+/.idea
+/.vscode
