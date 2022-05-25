@@ -18,7 +18,7 @@ class DBStatement
         return $this->stmt->bindValue($param, $value);
     }
 
-    public function result_exec(): bool|array
+    public function result_exec(): array
     {
         self::exec();
         return $this->stmt->fetchAll(PDO::FETCH_ASSOC);

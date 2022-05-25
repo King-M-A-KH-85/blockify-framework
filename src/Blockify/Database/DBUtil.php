@@ -18,14 +18,14 @@ class DBUtil
     const UPDATE = 3;
     const DELETE = 4;
 
-    public function setTable(string $table): static
+    public function setTable(string $table): DBUtil
     {
         $this->table = trim($table);
 
         return $this;
     }
 
-    public function setWhere(string $where): static
+    public function setWhere(string $where): DBUtil
     {
         $this->where = $where;
 
