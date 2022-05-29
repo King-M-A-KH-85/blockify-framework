@@ -3,11 +3,13 @@
 namespace Blockify;
 
 use Blockify\Interfaces\errorApplication;
+use Blockify\Models\Api;
 use ReflectionClass;
 use ReflectionException;
 
 /**
  * @author king m a kh
+ * @example https://thCode.ir
  * @version 1.0
  */
 final class Blockify
@@ -16,8 +18,8 @@ final class Blockify
     private string $requestController;
     private string $requestFunction;
     private array $jsonArguments;
-
     public errorApplication $errorController;
+    private bool $showDocument = false;
 
     public function __construct(string $_url, string $_defaultController, errorApplication $_errorController)
     {
@@ -29,7 +31,11 @@ final class Blockify
         $this->requestController = (($url[0] ?? '') == "") ? $_defaultController : $url[0];
 
         if (!$this->isPage) {
-            $this->requestFunction = (($url[1] ?? '') == "") ? "onRequest" : $url[1];
+            $this->requestFunction = (($url[1] ?? "") == "") ? "onRequest" : $url[1];
+
+            if ($this->requestFunction == "onRequest")
+                $this->showDocument = true;
+
             $this->jsonArguments = json_decode(file_get_contents('php://input'), true) ?? [];
         }
     }
@@ -43,43 +49,49 @@ final class Blockify
             if (!(file_exists("$viewPath$this->requestController.html") || file_exists("$viewPath$this->requestController.php")))
                 return $this->errorController::viewError($this->requestController);
 
-            return self::page_request($viewPath);
+            return self::pageRequest($viewPath);
 
         } else {
+            // check api exist
             if (!file_exists("$appPath$this->requestController.php")) {
                 return $this->errorController::classError($this->requestController)->toString();
             } else {
+                // require api class
                 require_once "$appPath$this->requestController.php";
 
+                // create instance of requestController
                 $instance = new ReflectionClass("$namespace$this->requestController");
 
+                if ($this->showDocument)
+                    return self::documentRequest($instance);
+
+                // check requestFunction function exist in requestController
                 if (!$instance->hasMethod($this->requestFunction))
                     return $this->errorController::functionError($this->requestFunction)->toString();
                 else {
-                    $method = $instance->getMethod($this->requestFunction);
+                    $function = $instance->getMethod($this->requestFunction);
 
-                    if (!$method->hasReturnType() || $method->getReturnType()->getName() != "Blockify\Models\Api") {
+                    if (!$function->hasReturnType() || $function->getReturnType()->getName() != "Blockify\Models\Api") {
                         return "no standard type";
 
                     } else {
-                        if (count($method->getParameters()) < count($this->jsonArguments))
-                            return $this->errorController::parameterCountError(count($method->getParameters()))->toString();
+
+                        if (count($function->getParameters()) < count($this->jsonArguments))
+                            return $this->errorController::parameterCountError(count($function->getParameters()))->toString();
                         else {
                             $notExistKeys = [];
                             $parameters = [];
 
-                            $parameterTypes = [];
 
-                            foreach ($method->getParameters() as $parameter) {
+                            foreach ($function->getParameters() as $parameter) {
                                 if (!array_key_exists($parameter->getName(), $this->jsonArguments))
                                     $notExistKeys[] = $parameter->getName();
 
-                                $parameterTypes[] = $parameter->getType();
                                 $parameters[] = $parameter->getName();
                             }
 
                             if (count($notExistKeys) > 0) {
-                                $comment = $method->getDocComment();
+                                $comment = $function->getDocComment();
                                 preg_match_all('/@param[a-zA-Z\d $_]+/i', $comment, $prob);
 
                                 $prob = $prob[0];
@@ -102,11 +114,42 @@ final class Blockify
                     }
                 }
             }
-            return self::api_request($namespace);
+            return self::apiRequest($namespace);
         }
     }
 
-    private function page_request(string $viewPath): string
+    private static function documentRequest(ReflectionClass $class): string
+    {
+        $classFunctions = $class->getMethods();
+        $functions = [];
+
+        foreach ($classFunctions as $item) {
+            $comments = $item->getDocComment();
+
+            preg_match_all('/@param[a-zA-Z\d $_]+/i', $comments, $prob);
+
+            $prob = $prob[0];
+            $docs = [];
+
+            foreach ($prob as $probItem)
+                $docs[] = preg_replace('/@param +(string|int|bool|array) +\$[a-z1-9_]+ */i', '', $probItem);
+
+            foreach ($item->getParameters() as $index => $parameter)
+                $functions[] = [
+                    "name" => $item->getName(),
+                    "args" => [
+                        "name" => $parameter->getName(),
+                        "document" => $docs[$index] ?? ''
+                    ]
+                ];
+        }
+
+        header('Content-Type: application/json;');
+
+        return (new Api(false, $class->getName(), $functions))->toString();
+    }
+
+    private function pageRequest(string $viewPath): string
     {
         header("Content-Type: text/html;");
         if (file_exists("$viewPath$this->requestController.html"))
@@ -120,7 +163,7 @@ final class Blockify
         }
     }
 
-    private function api_request(string $namespace): string
+    private function apiRequest(string $namespace): string
     {
         ob_start();
 
