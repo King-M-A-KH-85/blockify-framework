@@ -134,14 +134,18 @@ final class Blockify
             foreach ($prob as $probItem)
                 $docs[] = preg_replace('/@param +(string|int|bool|array) +\$[a-z1-9_]+ */i', '', $probItem);
 
+            $args = [];
+
             foreach ($item->getParameters() as $index => $parameter)
-                $functions[] = [
-                    "name" => $item->getName(),
-                    "args" => [
-                        "name" => $parameter->getName(),
-                        "document" => $docs[$index] ?? ''
-                    ]
+                $args[] = [
+                    "name" => $parameter->getName(),
+                    "document" => $docs[$index] ?? ''
                 ];
+
+            $functions[] = [
+                "name" => $item->getName(),
+                "args" => $args
+            ];
         }
 
         header('Content-Type: application/json;');
